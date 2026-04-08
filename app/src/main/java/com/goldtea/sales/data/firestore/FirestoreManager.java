@@ -38,6 +38,8 @@ import java.util.Map;
 public class FirestoreManager {
     private static final String TAG = "FirestoreManager";
     private static FirestoreManager instance;
+    // Temporary switch: keep Firebase SDK for local persistence, but disable all online sync/auth.
+    private static final boolean FIREBASE_ONLINE_SYNC_ENABLED = false;
     
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -89,6 +91,11 @@ public class FirestoreManager {
                 .build();
             db.setFirestoreSettings(settings);
             Log.d(TAG, "Firestore initialized with persistence enabled");
+            if (!FIREBASE_ONLINE_SYNC_ENABLED) {
+                db.disableNetwork()
+                    .addOnSuccessListener(aVoid -> Log.i(TAG, "Firestore network disabled (local-only mode)"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Unable to disable Firestore network", e));
+            }
         } catch (Exception e) {
             Log.e(TAG, "Error initializing Firestore", e);
         }
@@ -96,8 +103,13 @@ public class FirestoreManager {
         // 2. Initialize Auth
         auth = FirebaseAuth.getInstance();
 
-        // 3. Setup Connectivity Listener
-        setupConnectivityListener();
+        // 3. Setup connectivity tracking only when online sync is enabled.
+        if (FIREBASE_ONLINE_SYNC_ENABLED) {
+            setupConnectivityListener();
+        } else {
+            isOnline = false;
+            Log.i(TAG, "Running in local-only mode. Connectivity listener skipped.");
+        }
     }
     
     private void setupConnectivityListener() {
@@ -201,6 +213,11 @@ public class FirestoreManager {
      * Initialize Firestore with offline persistence
      */
     public void initialize(final OnInitializeListener listener) {
+        if (!FIREBASE_ONLINE_SYNC_ENABLED) {
+            if (listener != null) listener.onSuccess();
+            return;
+        }
+
         // Check if already signed in
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {

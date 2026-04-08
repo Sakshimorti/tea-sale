@@ -9,10 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.goldtea.sales.data.firestore.FirestoreManager;
 import com.goldtea.sales.ui.dashboard.DashboardFragment;
 import com.goldtea.sales.ui.newsale.NewSaleFragment;
-import com.goldtea.sales.ui.reports.ReportsFragment;
+// import com.goldtea.sales.ui.reports.ReportsFragment; // Temporarily disabled
 import com.goldtea.sales.ui.settings.SettingsFragment;
 import com.goldtea.sales.ui.viewsales.ViewSalesFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -43,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         bottomNav = findViewById(R.id.bottom_navigation);
+        // Temporarily hide Reports tab without removing its module/files.
+        bottomNav.getMenu().findItem(R.id.nav_reports).setVisible(false);
         bottomNav.setOnItemSelectedListener(navListener);
         bottomNav.setBackgroundColor(getResources().getColor(R.color.surface));
 
@@ -72,10 +73,12 @@ public class MainActivity extends AppCompatActivity {
                     } else if (itemId == R.id.nav_view_sales) {
                         selectedFragment = new ViewSalesFragment();
                         title = "View Sales";
-                    } else if (itemId == R.id.nav_reports) {
-                        selectedFragment = new ReportsFragment();
-                        title = "Reports";
-                    } else if (itemId == R.id.nav_settings) {
+                    }
+                    // else if (itemId == R.id.nav_reports) {
+                    //     selectedFragment = new ReportsFragment();
+                    //     title = "Reports";
+                    // } else
+                    if (itemId == R.id.nav_settings) {
                         selectedFragment = new SettingsFragment();
                         title = "Settings";
                     }
